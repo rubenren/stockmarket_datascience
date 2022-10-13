@@ -1,0 +1,1 @@
+["AAPL", "MSFT", "BAC", "AMZN", "NWSA", "BA", "GOOGL", "GS", "TSLA", "NFLX", "TGT", "INTC", "DIS", "XOM", "JPM", "MS", "GM", "C", "GE", "MU", "TM", "WMB", "KO", "WFC", "WMT", "IBM", "UBER", "BLK", "CME", "CVX", "AA", "CMG", "SO", "VZ", "LMT", "EFX", "CAT", "BKR", "SBUX", "SLB", "JNJ", "T", "NKE", "PGR", "AMGN", "ICE", "FCX", "HD", "SPY"]
