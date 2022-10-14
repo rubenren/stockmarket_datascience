@@ -228,6 +228,11 @@ class FeatureBuilder(object):
         self.logger.debug('lengths: %s, %s, %s', self.train.shape, self.val.shape, self.test.shape)
         return scaler
 
+    def prep_data(self, ticker):
+        self.read_data(ticker)
+        self.add_features()
+        self.make_digestible()
+
     def save_features(self, ticker):
         if self.transformed is None:
             self.logger.error('No data to save!')

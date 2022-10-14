@@ -12,15 +12,16 @@ def _download_stock(symbol):
     data = yf.download(symbol)
     if len(data) == 0:
         logging.error('Could not find the stock ticker %s, skipping download' % symbol)
-        return
+        return 1
     filename = symbol + '_' + str(data.index[0])[:10] + '_' + str(data.index[-1])[:10] + '.csv'
     path_var = Path(__file__).parent / '..' / '..' / 'data' / 'raw'
     filepath = path_var / filename
     data.to_csv(filepath)
+    return 0
 
 
 class DataLoader(object):
-    """DataLoader object used for downloading stockmarket data from file tickers.txt"""
+    """DataLoader object used for downloading stockmarket data, tickers are in file tickers.txt"""
     def __init__(self, logger=None):
         # Set up Logger for the class
         self.logger = logger or logging.getLogger(__name__)
@@ -58,28 +59,40 @@ class DataLoader(object):
             json.dump(self.tickers, f)
         self.logger.info('Added symbol %s to our list', symbol_clean)
 
-    def update(self):
+        self.update(symbol)
+
+    def update(self, ticker=None, backup=False):
         # download the day's new data
         path_var = self.tickers_filepath.parent / 'raw'
         file_list = path_var.glob('*_*.csv')
+        ticker_list = self.tickers
+        if ticker is not None:
+            ticker_list = [ticker.upper()]
         files_to_ignore = []
-        self.logger.info('Moving old files to backup...')
+        self.logger.info('Removing old files...')
         for file in file_list:
             # build list of files to ignore
             if datetime.datetime.fromtimestamp(file.stat().st_mtime).date() == datetime.datetime.today().date():
                 files_to_ignore.append(file.name.split('_')[0])
-            else:
-                file.rename(file.parent.parent / 'backup' / 'raw' / file.name)  # moving file to backup database
+            elif backup:
                 self.logger.debug('Moving %s to backup', file.name)
+                file.rename(file.parent.parent / 'backup' / 'raw' / file.name)  # moving file to backup database
+            else:
+                self.logger.debug('Deleting %s', file.name)
+                file.unlink()
 
-        self.logger.info('Finished moving old files to backup!')
+        self.logger.info('Finished removing old files!')
         self.logger.info('Downloading files needed...')
 
-        for ticker in self.tickers:
+        self.logger.debug('Here is the ticker list: %s', ticker_list)
+        for ticker in ticker_list:
             if ticker in files_to_ignore:
                 continue  # skip over files we don't need to update
             self.logger.debug('Starting download for: %s', ticker)
-            _download_stock(ticker)
+            response = _download_stock(ticker)
+            if response:
+                self.logger.error('Couldn\'t download %s, removing from list...', ticker)
+                self.remove_ticker(ticker)
             self.logger.debug('Finished download!')
 
         self.logger.info('Finished all downloads!')
