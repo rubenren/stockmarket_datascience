@@ -38,7 +38,10 @@ class FeatureBuilderTestCase(unittest.TestCase):
 
 class ModelManagerTestCase(unittest.TestCase):
     def setUp(self):
-        self.model_man = ModelManager('TEST')
+        self.feat_builder = FeatureBuilder()
+        self.feat_builder.prep_data('TEST')
+        self.model_man = ModelManager()
+        self.model_man.create_or_load_model('TEST', self.feat_builder.train, self.feat_builder.val)
 
     def tearDown(self) -> None:
         del self.model_man
@@ -68,10 +71,14 @@ class DataLoaderTestCase(unittest.TestCase):
         self.assertTrue(filename in os.listdir('../data'))
 
     def test_ticker_adjustments(self):
-        self.data_loader.add_ticker('TEST')
-        self.assertTrue('TEST' in self.data_loader.tickers)
-        self.data_loader.remove_ticker('TEST')
-        self.assertTrue('TEST' not in self.data_loader.tickers)
+        self.data_loader.add_ticker('STUB')
+        self.assertTrue('STUB' not in self.data_loader.tickers)
+
+    def test_add_ticker(self):
+        self.data_loader.add_ticker('SPX')
+        self.assertTrue('SPX' in self.data_loader.tickers)
+        self.data_loader.remove_ticker('SPX')
+        self.assertTrue('SPX' not in self.data_loader.tickers)
 
 
 if __name__ == '__main__':
