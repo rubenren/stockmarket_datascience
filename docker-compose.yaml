@@ -1,0 +1,9 @@
+version: "1"
+
+services:
+    five-day-stocks:
+        build: .
+        command: ["run", "app.py"]
+        image: five-day-stocks:0.0.3
+        ports:
+            - 8501:8501
